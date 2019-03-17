@@ -13,13 +13,8 @@ use std::io::Write;
 pub fn get_html(url: &str) -> String {
 
     // get the text from url's path and deal with error.
-    let html_text = match reqwest::get(url).unwrap().text() {
+    reqwest::get(url).unwrap().text().unwrap()
 
-        Ok(html_text) => html_text.to_string(),
-        Err(_)  => panic!("sorry, can't get html page!"),
-
-    };
-    return html_text;
 }
 // store text into file.
 pub fn write_html(text: &str, file_path: &str, model: char) {
@@ -29,19 +24,21 @@ pub fn write_html(text: &str, file_path: &str, model: char) {
         File::create(file_path).unwrap();
     }
 
+    //set the way to write text into file
+    let mut open_mode = OpenOptions::new();
     match model {
         'a' => {
             // append text into file, but don't truncate it.
-            let mut file = OpenOptions::new().append(true).open(file_path).unwrap();
+            let mut file = open_mode.append(true).open(file_path).unwrap();
             file.write(text.as_bytes()).unwrap();
         },
         'w' => {
             // truncate file, and write text into file.
-            let mut file = OpenOptions::new().write(true)
-                                        .truncate(true).open(file_path).unwrap();
+            let mut file = open_mode.write(true).truncate(true).open(file_path).unwrap();
             file.write(text.as_bytes()).unwrap();
         },
          _  => panic!("invalid char"),
     }
 
 }
+
